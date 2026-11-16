@@ -8,10 +8,15 @@ document.querySelector('#app').innerHTML = `
     <p>Una experiencia de luz y esperanza para tu hogar.</p>
 
     <div class="camera-container">
+
       <video id="camera" autoplay playsinline muted></video>
+      
+      <canvas id="light-canvas"></canvas>
+
       <div class="message" id="message">
         Tu experiencia navideña comienza aquí ✨
       </div>
+
     </div>
 
     <button id="start">Activar experiencia</button>
