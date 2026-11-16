@@ -61,8 +61,8 @@ export async function detectarArbol(video) {
   console.log('Árbol:', arbol?.probability);
   console.log('Sin árbol:', sinArbol?.probability);
 
-  // Consideramos que hay un árbol si clase1 supera el 80 %.
-  const hayArbol = arbol && arbol.probability >= 0.80;
+  // Consideramos que hay un árbol si clase1 supera el 95 %.
+  const hayArbol = arbol && arbol.probability >= 0.95;
 
   // Devolvemos un resultado fácil de utilizar.
   return {

@@ -1,6 +1,11 @@
 
 import { cargarModelo, detectarArbol } from './detector.js';
 import './style.css'
+import {
+  inicializarParticulas,
+  activarLluvia,
+  detenerLluvia
+} from './particles.js';
 
 document.querySelector('#app').innerHTML = `
   <main class="experience">
@@ -10,7 +15,7 @@ document.querySelector('#app').innerHTML = `
     <div class="camera-container">
 
       <video id="camera" autoplay playsinline muted></video>
-      
+
       <canvas id="light-canvas"></canvas>
 
       <div class="message" id="message">
@@ -22,7 +27,7 @@ document.querySelector('#app').innerHTML = `
     <button id="start">Activar experiencia</button>
   </main>
 `
-
+inicializarParticulas();
 const video = document.querySelector('#camera')
 const button = document.querySelector('#start')
 const message = document.querySelector('#message')
@@ -54,11 +59,15 @@ async function analizarCamara() {
 
       message.textContent =
         `¡Árbol detectado! Confianza: ${porcentaje}%`;
+      
+      activarLluvia();
 
     } else {
 
       message.textContent =
         `Buscando árbol... Confianza: ${porcentaje}%`;
+
+      detenerLluvia();
     }
 
   } catch (error) {
