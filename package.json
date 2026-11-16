@@ -1,0 +1,18 @@
+{
+  "name": "lluvia-de-luz",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.3.6"
+  },
+  "dependencies": {
+    "@teachablemachine/image": "^0.8.5",
+    "three": "^0.187.0"
+  }
+}
