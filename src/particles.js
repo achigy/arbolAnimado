@@ -62,41 +62,152 @@ function ajustarCanvas() {
 // CREAR UNA PARTÍCULA
 // ------------------------------------
 
+
 function crearParticula() {
 
+  const ancho = canvas.clientWidth;
+  const alto = canvas.clientHeight;
+
   return {
-    x: Math.random() * canvas.clientWidth,
-    y: -10 - Math.random() * canvas.clientHeight,
 
-    radio: Math.random() * 2.5 + 1,
+    
+    tipo: Math.random() < 0.25 ? 'estrella' : 'luz',
+    rotacion: Math.random() * Math.PI,
+    velocidadRotacion: (Math.random() - 0.5) * 0.04,
 
-    velocidad: Math.random() * 1.5 + 0.5,
+    // Posición inicial.
+    x: Math.random() * ancho,
+    y: -10 - Math.random() * alto,
 
-    movimientoX: Math.random() - 0.5,
+    // Posición horizontal de referencia.
+    xInicial: Math.random() * ancho,
 
-    opacidad: Math.random() * 0.5 + 0.3
+    // Tamaño variable.
+    radio: Math.random() * 2.5 + 0.8,
+
+    // Velocidad de caída.
+    velocidad: Math.random() * 1.2 + 0.4,
+
+    // Amplitud del movimiento lateral.
+    amplitud: Math.random() * 25 + 5,
+
+    // Fase inicial del movimiento.
+    fase: Math.random() * Math.PI * 2,
+
+    // Velocidad del balanceo.
+    oscilacion: Math.random() * 0.035 + 0.01,
+
+    // Intensidad del brillo.
+    opacidad: Math.random() * 0.5 + 0.4,
+
+    // Variación del brillo.
+    pulso: Math.random() * 0.04 + 0.01
+
   };
 }
+
 
 
 // ------------------------------------
 // DIBUJAR UNA PARTÍCULA
 // ------------------------------------
 
+
 function dibujarParticula(p) {
 
+  ctx.save();
+
+  // Creamos un degradado circular.
+  const gradiente = ctx.createRadialGradient(
+    p.x, p.y, 0,
+    p.x, p.y, p.radio * 5
+  );
+
+  // Centro de la luz.
+  gradiente.addColorStop(
+    0,
+    `rgba(255, 255, 230, ${p.opacidad})`
+  );
+
+  // Luz dorada intermedia.
+  gradiente.addColorStop(
+    0.3,
+    `rgba(255, 210, 120, ${p.opacidad * 0.8})`
+  );
+
+  // Desvanecimiento exterior.
+  gradiente.addColorStop(
+    1,
+    'rgba(255, 180, 50, 0)'
+  );
+
+  // Dibujamos el halo luminoso.
   ctx.beginPath();
 
-  ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+  ctx.arc(
+    p.x,
+    p.y,
+    p.radio * 5,
+    0,
+    Math.PI * 2
+  );
 
-  ctx.fillStyle = `rgba(255, 210, 120, ${p.opacidad})`;
+  ctx.fillStyle = gradiente;
+  ctx.fill();
+
+  // Dibujamos el núcleo brillante.
+  ctx.beginPath();
+
+  ctx.arc(
+    p.x,
+    p.y,
+    p.radio,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle = '#fff9dc';
 
   ctx.shadowBlur = 15;
   ctx.shadowColor = '#ffd27a';
 
   ctx.fill();
 
-  ctx.shadowBlur = 0;
+  ctx.restore();
+    console.log('Dibujando particula en');
+}
+
+function dibujarEstrella(x, y, radio, rotacion) {
+  ctx.save();
+
+  ctx.translate(x, y);
+  ctx.rotate(rotacion);
+
+  ctx.beginPath();
+
+  for (let i = 0; i < 8; i++) {
+    const angulo = (Math.PI / 4) * i;
+    const radioPunta = i % 2 === 0 ? radio : radio * 0.3;
+
+    const px = Math.cos(angulo) * radioPunta;
+    const py = Math.sin(angulo) * radioPunta;
+
+    if (i === 0) {
+      ctx.moveTo(px, py);
+    } else {
+      ctx.lineTo(px, py);
+    }
+  }
+
+  ctx.closePath();
+  ctx.fillStyle = '#fff4c2';
+  ctx.shadowBlur = 18;
+  ctx.shadowColor = '#ffd27a';
+  ctx.fill();
+
+  ctx.restore();
+    console.log('Dibujando estrella en');
+
 }
 
 
@@ -105,6 +216,8 @@ function dibujarParticula(p) {
 // ------------------------------------
 
 function animar() {
+  const ancho = canvas.clientWidth;
+  const alto = canvas.clientHeight;
 
   ctx.clearRect(
     0,
@@ -118,16 +231,40 @@ function animar() {
   }
 
   // Actualizamos cada partícula.
-  particulas.forEach((p, indice) => {
 
+ particulas.forEach((p, indice) => {
+
+    // 1. Movimiento vertical
     p.y += p.velocidad;
-    p.x += p.movimientoX;
 
-    dibujarParticula(p);
+    // 2. Movimiento lateral
+    p.fase += p.oscilacion;
+    p.x = p.xInicial + Math.sin(p.fase) * p.amplitud;
 
-    if (p.y > canvas.clientHeight + 10) {
-      particulas.splice(indice, 1);
+    // 3. Variación de luminosidad
+    p.opacidad = 0.6 + Math.sin(p.fase * 2) * p.pulso;
+
+    // 4. Si sale de la pantalla, creamos otra
+    if (p.y > alto + 20) {
+      particulas[indice] = crearParticula();
+      return;
     }
+
+    // 5. Rotación de estrellas
+    if (p.tipo === 'estrella') {
+      p.rotacion += p.velocidadRotacion;
+
+      dibujarEstrella(
+        p.x,
+        p.y,
+        p.radio * 3,
+        p.rotacion
+      );
+
+    } else {
+      dibujarParticula(p);
+    }
+
   });
 
   if (lluviaActiva) {
@@ -147,6 +284,7 @@ export function activarLluvia() {
   if (lluviaActiva) return;
 
   lluviaActiva = true;
+  console.log('Lluvia de luz activada');
 
   animar();
 }
