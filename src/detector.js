@@ -4,7 +4,7 @@
 import * as tmImage from '@teachablemachine/image';
 
 // Dirección donde guardamos nuestro modelo.
-const MODEL_URL =`${import.meta.env.BASE_URL}model/`;
+const MODEL_URL =`${import.meta.env.BASE_URL}model/`;//dinamico
 
 // Variable donde almacenaremos el modelo una vez cargado.
 let model = null;
