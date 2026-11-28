@@ -98,6 +98,9 @@ function crearParticula() {
     // Amplitud del movimiento lateral.
     amplitud: Math.random() * 25 + 5,
 
+    vida: 0,
+    duracion: Math.random() * 150 + 300,
+
     // Fase inicial del movimiento.
     fase: Math.random() * Math.PI * 2,
 
@@ -106,6 +109,12 @@ function crearParticula() {
 
     // Intensidad del brillo.
     opacidad: Math.random() * 0.5 + 0.4,
+
+        // Profundidad simulada: 0 = lejos, 1 = cerca
+    profundidad: Math.random() * 0.85 + 0.15,
+
+    // Escala visual según la profundidad
+    escala: 1,
 
     // Variación del brillo.
     pulso: Math.random() * 0.04 + 0.01
@@ -166,7 +175,7 @@ function dibujarParticula(p) {
   // Creamos un degradado circular.
   const gradiente = ctx.createRadialGradient(
     p.x, p.y, 0,
-    p.x, p.y, p.radio * 5
+    p.x, p.y, p.radio * 5 * p.escala
   );
 
   // Centro de la luz.
@@ -193,7 +202,7 @@ function dibujarParticula(p) {
   ctx.arc(
     p.x,
     p.y,
-    p.radio * 5,
+    p.radio * 5 * p.escala,
     0,
     Math.PI * 2
   );
@@ -207,7 +216,7 @@ function dibujarParticula(p) {
   ctx.arc(
     p.x,
     p.y,
-    p.radio,
+    p.radio * p.escala,
     0,
     Math.PI * 2
   );
@@ -278,22 +287,33 @@ function animar() {
 
  particulas.forEach((p, indice) => {
 
-    // 1. Movimiento vertical
-    p.y += p.velocidad;
+    p.vida++;
+
+    const progreso = p.vida / p.duracion;
+
+    p.opacidad =
+    Math.sin(progreso * Math.PI) *
+    0.8 *
+    (0.35 + p.profundidad * 0.65);
+    // Las partículas cercanas caen más rápido
+    p.y += p.velocidad * (0.5 + p.profundidad);
 
     // 2. Movimiento lateral
     p.fase += p.oscilacion;
-    p.x = p.xInicial + Math.sin(p.fase) * p.amplitud;
+    // Las partículas cercanas tienen mayor desplazamiento
+    p.x = p.xInicial +
+      Math.sin(p.fase) *
+      p.amplitud *
+      (0.5 + p.profundidad);
 
     // 3. Variación de luminosidad
     p.opacidad = 0.6 + Math.sin(p.fase * 2) * p.pulso;
 
     // 4. Si sale de la pantalla, creamos otra
-    if (p.y > alto + 20) {
-      particulas[indice] = crearParticula();
-      return;
-    }
-
+    if (p.y > alto + 20 || p.vida >= p.duracion) {
+    particulas[indice] = crearParticula();
+    return;
+}
     // 5. Rotación de estrellas
     if (p.tipo === 'estrella') {
       p.rotacion += p.velocidadRotacion;
@@ -312,7 +332,8 @@ function animar() {
         dibujarParticula(p);
       }
     }
-
+    // Simular perspectiva
+    p.escala = 0.45 + p.profundidad * 1.1;
   });
 
   if (lluviaActiva) {
