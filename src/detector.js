@@ -22,6 +22,7 @@ export async function cargarModelo() {
     );
 
     console.log('Modelo cargado correctamente');
+    console.log(`${import.meta.env.BASE_URL}model/`);
 
     // Devolvemos el modelo para confirmar que se cargó.
     return model;

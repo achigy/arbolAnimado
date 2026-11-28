@@ -71,7 +71,14 @@ function crearParticula() {
   return {
 
     
-    tipo: Math.random() < 0.25 ? 'estrella' : 'luz',
+    tipo: (() => {
+      const aleatorio = Math.random();
+
+      if (aleatorio < 0.15) return 'polvo';
+      if (aleatorio < 0.40) return 'estrella';
+
+      return 'luz';
+    })(),
     rotacion: Math.random() * Math.PI,
     velocidadRotacion: (Math.random() - 0.5) * 0.04,
 
@@ -112,6 +119,45 @@ function crearParticula() {
 // DIBUJAR UNA PARTÍCULA
 // ------------------------------------
 
+
+function dibujarPolvo(p) {
+  ctx.save();
+
+  // Halo exterior
+  const gradiente = ctx.createRadialGradient(
+    p.x, p.y, 0,
+    p.x, p.y, p.radio * 5
+  );
+
+  gradiente.addColorStop(
+    0,
+    `rgba(255, 250, 220, ${p.opacidad})`
+  );
+
+  gradiente.addColorStop(
+    0.35,
+    `rgba(255, 205, 100, ${p.opacidad * 0.5})`
+  );
+
+  gradiente.addColorStop(
+    1,
+    'rgba(255, 180, 50, 0)'
+  );
+
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.radio * 5, 0, Math.PI * 2);
+  ctx.fillStyle = gradiente;
+  ctx.fill();
+
+  // Centro luminoso
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff9dc';
+  ctx.fill();
+
+  ctx.restore();
+    console.log('Dibujando polvo');
+}
 
 function dibujarParticula(p) {
 
@@ -174,7 +220,6 @@ function dibujarParticula(p) {
   ctx.fill();
 
   ctx.restore();
-    console.log('Dibujando particula en');
 }
 
 function dibujarEstrella(x, y, radio, rotacion) {
@@ -206,7 +251,6 @@ function dibujarEstrella(x, y, radio, rotacion) {
   ctx.fill();
 
   ctx.restore();
-    console.log('Dibujando estrella en');
 
 }
 
@@ -226,7 +270,7 @@ function animar() {
     canvas.clientHeight
   );
 
-  if (particulas.length < 100) {
+  if (particulas.length < 500) {
     particulas.push(crearParticula());
   }
 
@@ -262,7 +306,11 @@ function animar() {
       );
 
     } else {
-      dibujarParticula(p);
+      if(p.tipo === 'polvo') {
+      dibujarPolvo(p);
+      }else{
+        dibujarParticula(p);
+      }
     }
 
   });
